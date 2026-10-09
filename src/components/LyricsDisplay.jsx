@@ -1,48 +1,27 @@
-import { useEffect, useRef, useState } from 'react'
+// Shows only the current line and a dimmed preview of the next one.
+function LyricsDisplay({ progressMs, lyrics }) {
+  if (!lyrics) {
+    return <p className="next">No synced lyrics for this song</p>
+  }
 
-function LyricsDisplay({ songData, lyrics }) {
-  const lyricsRef = useRef(null)
-  const [currentLyricIndex, setCurrentLyricIndex] = useState(0)
+  let idx = -1
+  for (let i = 0; i < lyrics.length; i++) {
+    if (lyrics[i].startTimeMs <= progressMs) idx = i
+    else break
+  }
 
-  useEffect(() => {
-    if (!lyrics || lyrics.length === 0 || !songData?.progress_ms) return
-
-    // Find the closest lyric that matches song progress
-    let currentIndex = lyrics.findIndex(
-      (line, index) =>
-        songData.progress_ms >= line.startTimeMs &&
-        (index === lyrics.length - 1 || songData.progress_ms < lyrics[index + 1].startTimeMs)
-    )
-
-    if (currentIndex === -1) {
-      setCurrentLyricIndex(0)
-    } else {
-      setCurrentLyricIndex(currentIndex)
-    }
-  }, [songData?.progress_ms, lyrics])
-
-  useEffect(() => {
-    if (lyricsRef.current) {
-      const lyricElements = lyricsRef.current.children
-
-      if (lyricElements[currentLyricIndex]) {
-        lyricElements[currentLyricIndex].scrollIntoView({ behavior: 'smooth', block: 'center' })
-      }
-    }
-  }, [currentLyricIndex])
+  const current = idx >= 0 ? lyrics[idx].words : '♪'
+  const next = lyrics[idx + 1]?.words ?? ''
 
   return (
-    <div className="lyrics-box" ref={lyricsRef}>
-      {lyrics === null ? (
-        <p>No lyrics...</p>
-      ) : (
-        lyrics.map((line, index) => (
-          <p key={index} className={`lyrics-line ${index === currentLyricIndex ? 'active' : ''}`}>
-            {line.words}
-          </p>
-        ))
-      )}
-    </div>
+    <>
+      {/* key restarts the fade-in animation whenever the line changes */}
+      <p className="current" key={idx}>
+        {current}
+      </p>
+      <p className="next">{next}</p>
+    </>
   )
 }
+
 export { LyricsDisplay }

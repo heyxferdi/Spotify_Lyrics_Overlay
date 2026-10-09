@@ -1,90 +1,79 @@
 import { useEffect, useState } from "react";
 
-import { useSpotifyAuth } from "./hooks/useSpotifyAuth";
-import { formatTime, getCallSpeed } from "./util/helperFunctions";
 import TitleDisplay from "./components/TitleDisplay";
 import { LyricsDisplay } from "./components/LyricsDisplay";
-const BEARER_TOKEN = import.meta.env.VITE_BEARER_TOKEN;
 
+// Now-playing info comes from Windows (via the Electron main process) and
+// lyrics from LRCLIB. No Spotify API or token is used.
 function App() {
-  const [songData, setSongData] = useState(null);
-  const [songAudioData, setSongAudioData] = useState(null);
+  const [media, setMedia] = useState(null); // last update + receivedAt
   const [lyrics, setLyrics] = useState(null);
+  const [now, setNow] = useState(Date.now());
 
-  const name = songData?.item?.name;
-  const artist = songData?.item?.artists.map((a) => a.name).join(", ");
-  const trackId = songData?.item?.id;
+  const hasBridge = typeof window !== "undefined" && !!window.overlay;
 
-  const spotifyApi = useSpotifyAuth();
-
+  // Receive media updates from Electron
   useEffect(() => {
-    let interval;
+    if (!hasBridge) return;
+    return window.overlay.onMedia((m) =>
+      setMedia(m && m.title ? { ...m, receivedAt: Date.now() } : null)
+    );
+  }, [hasBridge]);
 
-    async function fetchData() {
-      try {
-        const res = await spotifyApi.getMyCurrentPlayingTrack();
-        if (res?.item) {
-          setSongData(res);
-        } else {
-          console.log("No song is currently playing.");
-        }
-      } catch (err) {
-        console.error("❌ Error fetching current track:", err);
-      }
-    }
-    fetchData();
-    interval = setInterval(fetchData, getCallSpeed(songAudioData?.tempo));
-
-    return () => clearInterval(interval);
-  }, [songAudioData?.tempo, spotifyApi]);
-
+  // Local clock so lyrics keep moving between updates
   useEffect(() => {
-    if (!trackId) return;
+    if (!media?.playing) return;
+    const t = setInterval(() => setNow(Date.now()), 250);
+    return () => clearInterval(t);
+  }, [media?.playing]);
 
-    async function fetchTrackData() {
-      try {
-        const [lyricsRes, audioRes] = await Promise.all([
-          fetch(
-            `https://spclient.wg.spotify.com/color-lyrics/v2/track/${trackId}?format=json&market=from_token`,
-            {
-              headers: {
-                Authorization: `Bearer ${BEARER_TOKEN}`,
-                "App-Platform": "WebPlayer",
-              },
-            }
-          ),
-          fetch(`https://api.spotify.com/v1/audio-features/${trackId}`, {
-            headers: {
-              Authorization: `Bearer ${BEARER_TOKEN}`,
-              "App-Platform": "WebPlayer",
-            },
-          }),
-        ]);
+  const trackKey = media ? `${media.title}|${media.artist}|${media.album}` : null;
 
-        const lyricsData = await lyricsRes.json();
-        const audioData = await audioRes.json();
-
-        setLyrics(lyricsData?.lyrics?.lines);
-        setSongAudioData(audioData);
-      } catch (err) {
-        setLyrics(null);
-        console.error("❌ Error fetching track data:", err);
-      }
+  // Fetch lyrics when the track changes
+  useEffect(() => {
+    if (!trackKey || !hasBridge) {
+      setLyrics(null);
+      return;
     }
+    let cancelled = false;
+    setLyrics(null);
+    window.overlay
+      .getLyrics({
+        title: media.title,
+        artist: media.artist,
+        album: media.album,
+        durationMs: media.durationMs,
+      })
+      .then((lines) => {
+        if (!cancelled) setLyrics(lines && lines.length ? lines : null);
+      })
+      .catch(() => !cancelled && setLyrics(null));
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [trackKey, hasBridge]);
 
-    fetchTrackData();
-  }, [trackId]);
+  if (!hasBridge) {
+    return (
+      <div className="overlay">
+        <p className="next">Open the Electron overlay window</p>
+      </div>
+    );
+  }
+
+  // Nothing playing -> show nothing at all
+  if (!media) return null;
+
+  const progress =
+    media.positionMs + (media.playing ? Math.max(now - media.receivedAt, 0) : 0);
+  const pct = media.durationMs ? Math.min(progress / media.durationMs, 1) * 100 : 0;
 
   return (
-    <div className="divContainer">
-      <TitleDisplay
-        name={name}
-        artist={artist}
-        imageUrl={songData?.item?.album.images[0].url}
-        progress_ms={songData?.progress_ms}
-        formatTime={formatTime}
-      />
-      <LyricsDisplay songData={songData} lyrics={lyrics} />
+    <div className={`overlay${media.playing ? "" : " paused"}`}>
+      <TitleDisplay name={media.title} artist={media.artist} />
+      <LyricsDisplay progressMs={progress} lyrics={lyrics} />
+      <div className="progress" style={{ width: `${pct}%` }} />
     </div>
   );
 }

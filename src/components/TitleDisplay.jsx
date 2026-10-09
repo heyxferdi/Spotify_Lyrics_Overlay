@@ -1,15 +1,9 @@
-function TitleDisplay({ name, artist, imageUrl, progress_ms, formatTime }) {
+function TitleDisplay({ name, artist }) {
   return (
-    <>
-      <div className="song-info">
-        <img src={decodeURIComponent(imageUrl)} alt="Album Cover" className="album-cover" />
-        <div className="song-info-text">
-          <h2 className="song-title">{name || 'Loading...'}</h2>
-          <p className="song-artist">{artist || 'Loading...'}</p>
-        </div>
-      </div>
-      <p className="song-progress">{formatTime(progress_ms)}</p>
-    </>
+    <div className="meta">
+      <span className="title">{name}</span>
+      {artist ? <span> · {artist}</span> : null}
+    </div>
   )
 }
 

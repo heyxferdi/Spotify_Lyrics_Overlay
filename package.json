@@ -1,7 +1,9 @@
 {
   "name": "spotify-lyrics-overlay",
+  "productName": "Lyrics Overlay",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "Compact always-on-top synced lyrics overlay for Windows",
   "type": "module",
   "main": "public/electron.cjs",
   "license": "MIT",
@@ -11,26 +13,60 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "electron": "electron .",
-    "start": "concurrently -k \"npm run dev\" \" npm run electron\""
+    "start": "concurrently -k \"npm run dev\" \" npm run electron\"",
+    "dist": "vite build && electron-builder --win"
   },
-  "dependencies": {
-    "dotenv": "^16.5.0",
-    "electron": "^36.2.1",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "spotify-web-api-js": "^1.5.2"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@eslint/js": "^9.25.0",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
     "@vitejs/plugin-react": "^4.4.1",
     "concurrently": "^9.1.2",
+    "dotenv": "^16.5.0",
+    "electron": "^36.2.1",
+    "electron-builder": "^26.0.0",
     "eslint": "^9.25.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.19",
     "globals": "^16.0.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
     "vite": "^6.3.5",
     "wait-on": "^8.0.3"
+  },
+  "build": {
+    "appId": "com.lyricsoverlay.app",
+    "productName": "Lyrics Overlay",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "!dist/*.cjs",
+      "!dist/*.ps1",
+      "public/electron.cjs",
+      "public/preload.cjs",
+      "public/lyrics.cjs",
+      "public/media-watcher.ps1",
+      "public/icon.png",
+      "package.json"
+    ],
+    "asarUnpack": [
+      "public/media-watcher.ps1",
+      "public/icon.png"
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "public/icon.png"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "deleteAppDataOnUninstall": true
+    }
   }
 }
