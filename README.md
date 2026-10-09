@@ -22,6 +22,11 @@ It stays small and out of the way while you play:
   <img src="docs/demo.gif" alt="The overlay running at the top of the screen over a game" width="800">
 </p>
 
+
+https://github.com/user-attachments/assets/816e4b1d-a748-4218-bacf-33f9a13a04b8
+
+
+
 ---
 
 ## Download
