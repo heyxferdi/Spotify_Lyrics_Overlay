@@ -18,14 +18,7 @@ It shows the current lyric line and a dimmed preview of the next one in a compac
 
 It stays small and out of the way while you play:
 
-<p align="center">
-  <img src="docs/demo.gif" alt="The overlay running at the top of the screen over a game" width="800">
-</p>
-
-
-https://github.com/user-attachments/assets/816e4b1d-a748-4218-bacf-33f9a13a04b8
-
-
+<!-- DEMO VIDEO: on github.com, edit this file and drag the .mp4 onto this line -->
 
 ---
 
