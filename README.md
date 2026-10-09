@@ -6,7 +6,21 @@ It shows the current lyric line and a dimmed preview of the next one in a compac
 
 > **Forked from [Nicolas-Arias3142/Spotify_Lyrics_Overlay](https://github.com/Nicolas-Arias3142/Spotify_Lyrics_Overlay).** Thanks to the original author for the idea and the starting point. See [What changed](#what-changed) below.
 
-[Download](#download) · [Using it](#using-it) · [Troubleshooting](#troubleshooting) · [Build from source](#build-from-source) · [Credits](#credits)
+[Preview](#preview) · [Download](#download) · [Using it](#using-it) · [Troubleshooting](#troubleshooting) · [Build from source](#build-from-source) · [Credits](#credits)
+
+---
+
+## Preview
+
+<p align="center">
+  <img src="docs/preview.png" alt="Close-up of the overlay showing the song title, the current lyric line and the next line" width="440">
+</p>
+
+It stays small and out of the way while you play:
+
+<p align="center">
+  <img src="docs/demo.gif" alt="The overlay running at the top of the screen over a game" width="800">
+</p>
 
 ---
 
