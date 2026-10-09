@@ -20,6 +20,11 @@ It stays small and out of the way while you play:
 
 <!-- DEMO VIDEO: on github.com, edit this file and drag the .mp4 onto this line -->
 
+
+https://github.com/user-attachments/assets/816e4b1d-a748-4218-bacf-33f9a13a04b8
+
+
+
 ---
 
 ## Download
